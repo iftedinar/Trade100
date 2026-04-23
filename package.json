@@ -1,0 +1,9 @@
+# Copy this to .env.local for local development
+# Add these as Environment Variables in your Vercel project dashboard
+
+# Required: Get free key at https://finnhub.io/register
+FINNHUB_API_KEY=your_finnhub_key_here
+
+# Required: Get key at https://console.anthropic.com
+# Used for AI stock analysis and news sentiment scoring
+ANTHROPIC_API_KEY=your_anthropic_key_here
