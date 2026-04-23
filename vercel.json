@@ -1,123 +1,24 @@
-# Clarity — Stock Analysis Platform
-### Deploy guide (10 minutes, free)
-
----
-
-## What you need
-- A **GitHub account** (free) — github.com
-- A **Vercel account** (free) — vercel.com
-- A **Finnhub API key** (free) — finnhub.io/register
-- An **Anthropic API key** (paid, ~$5 credit goes a long way) — console.anthropic.com
-
----
-
-## Step 1 — Upload to GitHub
-
-1. Go to **github.com** → click **New repository**
-2. Name it `clarity-stocks` → click **Create repository**
-3. Upload all files from this folder:
-   - Drag and drop the entire `clarity-app` folder contents
-   - OR use GitHub Desktop (easiest for non-developers)
-4. Click **Commit changes**
-
-Your repo should have this structure:
-```
-clarity-stocks/
-├── api/
-│   ├── claude.js
-│   ├── quote.js
-│   └── finnhub.js
-├── public/
-│   └── index.html
-├── package.json
-├── vercel.json
-└── .env.example
-```
-
----
-
-## Step 2 — Deploy to Vercel
-
-1. Go to **vercel.com** → Sign in with GitHub
-2. Click **Add New Project**
-3. Select your `clarity-stocks` repository → click **Import**
-4. Leave all settings as default → click **Deploy**
-5. Wait ~30 seconds — Vercel builds and deploys automatically
-
-You now have a live URL like `clarity-stocks.vercel.app` 🎉
-
----
-
-## Step 3 — Add your API keys (critical)
-
-Without these the app shows fallback data only.
-
-1. In Vercel dashboard → click your project → **Settings** → **Environment Variables**
-2. Add these two variables:
-
-| Name | Value | Where to get it |
-|------|-------|-----------------|
-| `FINNHUB_API_KEY` | your key | finnhub.io/register (free) |
-| `ANTHROPIC_API_KEY` | your key | console.anthropic.com |
-
-3. Click **Save** for each
-4. Go to **Deployments** → click **Redeploy** (so the new keys take effect)
-
----
-
-## Step 4 — Done ✅
-
-Visit your Vercel URL. You should see:
-- All 39 stocks loading with real prices
-- News tab showing real headlines with AI sentiment
-- Fundamentals tab with real financial data
-- Expert tab with AI-generated analysis
-
----
-
-## Updating the app later
-
-Every time you push a change to GitHub, Vercel auto-deploys in ~30 seconds. No manual steps needed.
-
----
-
-## Cost breakdown
-
-| Service | Cost |
-|---------|------|
-| Vercel hosting | **Free** (Hobby plan) |
-| Finnhub API | **Free** (60 calls/min) |
-| Anthropic API | ~$0.003 per analysis (very cheap) |
-| Yahoo Finance | **Free** (unofficial, via our backend) |
-
-**Estimated monthly cost for personal use: < $1**
-
----
-
-## File structure explained
-
-```
-api/claude.js    — Sends AI analysis requests to Anthropic (keeps your key secret)
-api/quote.js     — Fetches stock prices from Yahoo Finance (no CORS issues)
-api/finnhub.js   — Fetches news + fundamentals from Finnhub (keeps your key secret)
-public/index.html — The entire frontend app (HTML + CSS + JS in one file)
-vercel.json      — Tells Vercel how to route requests
-```
-
----
-
-## Troubleshooting
-
-**Stocks not loading?**
-- Check Vercel → Functions → look for errors in `api/quote.js`
-
-**No news showing?**
-- Make sure `FINNHUB_API_KEY` is set in Vercel Environment Variables
-- Redeploy after adding keys
-
-**AI analysis not working?**
-- Make sure `ANTHROPIC_API_KEY` is set in Vercel Environment Variables
-- Check you have credit at console.anthropic.com
-
-**Seeing old data?**
-- Hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+{
+  "functions": {
+    "api/claude.js": { "memory": 256, "maxDuration": 30 },
+    "api/quote.js": { "memory": 128, "maxDuration": 10 },
+    "api/finnhub.js": { "memory": 128, "maxDuration": 10 }
+  },
+  "rewrites": [
+    { "source": "/api/claude", "destination": "/api/claude.js" },
+    { "source": "/api/quote", "destination": "/api/quote.js" },
+    { "source": "/api/finnhub", "destination": "/api/finnhub.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=300, stale-while-revalidate"
+        }
+      ]
+    }
+  ]
+}
